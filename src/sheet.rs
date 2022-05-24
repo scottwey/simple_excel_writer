@@ -336,10 +336,10 @@ const COLUMN_LETTER_MAPPER: [&str; 26] = [
  */
 
 pub fn column_letter(column_index: usize) -> String {
+    let column_index = (column_index - 1) % 26 as usize; // turn to 0-based;
     if column_index >= 26 {
         println!("WARNING!!!!!!!!! we only support up to an index of 26 because we precomputed all this shizz. if you go over this, you will get weird results, like column rollover.")
     }
-    let column_index = (column_index - 1) % 26 as usize; // turn to 0-based;
     COLUMN_LETTER_MAPPER[column_index].to_string()
 }
 
