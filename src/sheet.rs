@@ -25,12 +25,15 @@ pub struct AutoFilter {
     pub start_col: String,
     pub end_col: String,
     pub start_row: usize,
-    pub end_row: usize
+    pub end_row: usize,
 }
 
 impl ToString for AutoFilter {
     fn to_string(&self) -> String {
-        format!("{}{}:{}{}", self.start_col, self.start_row, self.end_col, self.end_row)
+        format!(
+            "{}{}:{}{}",
+            self.start_col, self.start_row, self.end_col, self.end_row
+        )
     }
 }
 
@@ -42,7 +45,7 @@ pub struct Sheet {
     max_row_index: usize,
     pub calc_chain: Vec<String>,
     pub merged_cells: Vec<MergedCell>,
-    pub auto_filter: Option<AutoFilter>
+    pub auto_filter: Option<AutoFilter>,
 }
 
 #[derive(Default)]
@@ -365,11 +368,20 @@ impl Sheet {
     /// The arguments are used to construct the range of columns and rows used by the "AutoFilter"
     /// feature. For example: Column 1, Row 1 to Column 2, Row 2 will create the range "A1:B2".
     /// If invalid parameters are provided, the "AutoFilter" is not created.
-    pub fn add_auto_filter(&mut self, start_col: usize, end_col: usize, start_row: usize, end_row: usize) {
+    pub fn add_auto_filter(
+        &mut self,
+        start_col: usize,
+        end_col: usize,
+        start_row: usize,
+        end_row: usize,
+    ) {
         if start_col > 0 && start_row > 0 && start_col <= end_col && start_row <= end_row {
-            self.auto_filter = Some(AutoFilter{ start_col: column_letter(start_col),
-                                                end_col: column_letter(end_col),
-                                                start_row, end_row });
+            self.auto_filter = Some(AutoFilter {
+                start_col: column_letter(start_col),
+                end_col: column_letter(end_col),
+                start_row,
+                end_row,
+            });
         }
     }
 
@@ -440,7 +452,13 @@ impl Sheet {
 
     fn write_data_end(&self, writer: &mut dyn Write) -> Result<()> {
         if let Some(auto_filter) = &self.auto_filter {
-            writer.write_all(format!("\n</sheetData>\n<autoFilter ref=\"{}\"/>\n", auto_filter.to_string()).as_bytes())
+            writer.write_all(
+                format!(
+                    "\n</sheetData>\n<autoFilter ref=\"{}\"/>\n",
+                    auto_filter.to_string()
+                )
+                .as_bytes(),
+            )
         } else {
             writer.write_all(b"\n</sheetData>\n")
         }
@@ -465,8 +483,7 @@ impl<'a, 'b> SheetWriter<'a, 'b> {
     }
 
     pub fn append_row(&mut self, row: Row) -> Result<()> {
-        self.sheet
-            .write_row(self.writer, row.replace_strings(&mut self.shared_strings))
+        self.sheet.write_row(self.writer, row)
     }
 
     pub fn append_blank_rows(&mut self, rows: usize) {
