@@ -233,7 +233,7 @@ impl Row {
         }
         for cell in self.cells.iter_mut() {
             cell.value = match &cell.value {
-                CellValue::String(val) => shared.register(&escape_xml(val)),
+                CellValue::String(val) => CellValue::String(escape_xml(val)),
                 x => x.to_owned(),
             };
         }
@@ -301,7 +301,11 @@ fn write_number(
 }
 
 fn escape_xml(str: &str) -> String {
-    str.to_string()
+    let str = str.replace("&", "&amp;");
+    let str = str.replace("<", "&lt;");
+    let str = str.replace(">", "&gt;");
+    let str = str.replace("'", "&apos;");
+    str.replace("\"", "&quot;")
 }
 
 impl Cell {
@@ -475,7 +479,8 @@ impl<'a, 'b> SheetWriter<'a, 'b> {
     }
 
     pub fn append_row(&mut self, row: Row) -> Result<()> {
-        self.sheet.write_row(self.writer, row)
+        self.sheet
+            .write_row(self.writer, row.replace_strings(&mut self.shared_strings))
     }
 
     pub fn append_blank_rows(&mut self, rows: usize) {
