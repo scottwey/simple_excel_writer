@@ -301,11 +301,7 @@ fn write_number(
 }
 
 fn escape_xml(str: &str) -> String {
-    let str = str.replace("&", "&amp;");
-    let str = str.replace("<", "&lt;");
-    let str = str.replace(">", "&gt;");
-    let str = str.replace("'", "&apos;");
-    str.replace("\"", "&quot;")
+    str.to_string()
 }
 
 impl Cell {
