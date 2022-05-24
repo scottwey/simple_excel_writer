@@ -1,6 +1,6 @@
-use std::{borrow::Borrow, fs::File};
 use std::io::*;
 use std::path::*;
+use std::{borrow::Borrow, fs::File};
 
 use super::{Sheet, SheetWriter};
 
@@ -20,7 +20,7 @@ fn path_format(path: &std::path::Path) -> String {
 
             buf.push_str(s.to_string_lossy().borrow());
         }
-        
+
         buf
     })
 }
@@ -159,7 +159,7 @@ impl Workbook {
         }
 
         if let Some(xlsx_file) = &self.xlsx_file {
-            let mut file = File::create(xlsx_file)?;
+            let mut file = BufWriter::new(File::create(xlsx_file)?);
             file.write_all(&buf)?;
             self.saved = true;
 
@@ -242,7 +242,7 @@ impl Workbook {
             data: writer,
         });
         root.pop();
-        
+
         root.push("calcChain.xml");
         let mut writer = Vec::new();
         self.create_calc_chain(&mut writer)?;
@@ -316,10 +316,7 @@ impl Workbook {
 <calcChain xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">"#;
         writer.write_all(xml)?;
         for x in &self.calc_chain {
-            let wb = format!(
-                "<c r=\"{}\" i=\"{}\"/>",
-                x.0, x.1
-            );
+            let wb = format!("<c r=\"{}\" i=\"{}\"/>", x.0, x.1);
             writer.write_all(wb.as_bytes())?;
         }
         let tail = br#"</calcChain>"#;
