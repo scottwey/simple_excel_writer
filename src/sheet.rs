@@ -326,25 +326,21 @@ pub fn ref_id(column_index: usize, row_index: usize) -> String {
     format!("{}{}", column_letter(column_index), row_index)
 }
 
+const COLUMN_LETTER_MAPPER: [&str; 26] = [
+    "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "K", "N", "O", "P", "Q", "R",
+    "T", "U", "V", "W", "X", "Y", "Z",
+];
+
 /**
  * column_index : 1-based
  */
+
 pub fn column_letter(column_index: usize) -> String {
-    let mut column_index = (column_index - 1) as isize; // turn to 0-based;
-    let single = |n: u8| {
-        // n : 0-based
-        (b'A' + n) as char
-    };
-    let mut result = vec![];
-    while column_index >= 0 {
-        result.push(single((column_index % 26) as u8));
-        column_index = column_index / 26 - 1;
+    if column_index >= 26 {
+        println!("WARNING!!!!!!!!! we only support up to an index of 26 because we precomputed all this shizz. if you go over this, you will get weird results, like column rollover.")
     }
-
-    let result = result.into_iter().rev();
-
-    use std::iter::FromIterator;
-    String::from_iter(result)
+    let column_index = (column_index - 1) % 26 as usize; // turn to 0-based;
+    COLUMN_LETTER_MAPPER[column_index].to_string()
 }
 
 pub fn validate_name(name: &str) -> String {
