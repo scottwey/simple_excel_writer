@@ -152,7 +152,7 @@ impl Workbook {
             for archive_file in self.archive_files.iter() {
                 let options = zip::write::FileOptions::default();
                 writer.start_file(path_format(&archive_file.name), options)?;
-                writer.write_all(&archive_file.data)?;
+                BufWriter::new(&mut writer).write_all(&archive_file.data)?;
             }
 
             writer.finish()?;
